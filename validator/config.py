@@ -1,37 +1,51 @@
-
-
 class WebAppConfig:
-    # Primary Diagnosis: Dark Green (#23a373)
-    PRIMARY_DIAG_STYLE = {
-        "color": "#145A32", "backgroundColor": "#E9F5EF", "padding": "2px 4px",
-        "borderRadius": "4px", "fontWeight": "bold"
-    }
-    # Related Diagnosis: Light Green (#8abb4c)
-    OTHER_DIAG_STYLE = {
-        "color": "#515A48", "backgroundColor": "#F3F8EC", "padding": "2px 4px",
-        "borderRadius": "4px", "fontStyle": "italic"
-    }
-    # Major Procedure: Dark Purple (#875eaf)
-    MAJOR_PROC_STYLE = {
-        "color": "#4A235A", "backgroundColor": "#F3EFF7", "padding": "2px 4px",
-        "borderRadius": "4px", "fontWeight": "bold"
-    }
-    # Other Procedures: Light Purple (#d1a9da)
-    OTHER_PROC_STYLE = {
-        "color": "#6C3483", "backgroundColor": "#FBF5FC", "padding": "2px 4px",
-        "borderRadius": "4px", "fontStyle": "italic" 
-    }
-
+    # --- Base & Global Styles ---
+    # Common styles shared across multiple components
     BASE_STYLE = {
-        "padding": "2px 4px", "borderRadius": "4px", "cursor": "pointer", 
-        "transition": "all 0.2s ease-in-out"}
+        "padding": "2px 4px",
+        "borderRadius": "4px",
+        "cursor": "pointer",
+        "transition": "all 0.2s ease-in-out"
+    }
     
     HOVER_STYLE = {"boxShadow": "0px 0px 8px rgba(0, 0, 0, 0.3)"}
 
     TOOLTIP_STYLE = {
-        'font-size': '1.1em',
-        'background-color': '#343a40',
+        'fontSize': '1.1em',
+        'backgroundColor': '#343a40',
         'color': 'white',
-        'border-radius': '6px',
+        'borderRadius': '6px',
         'padding': '10px'
     }
+
+    # --- Nested Classes for Grouping ---
+
+    class Diagnosis:
+        """Contains styles related to medical diagnoses."""
+        # Specific styles are defined privately
+        _primary_specific = {"color": "#145A32", "backgroundColor": "#E9F5EF", "fontWeight": "bold"}
+        _other_specific = {"color": "#515A48", "backgroundColor": "#F3F8EC", "fontStyle": "italic"}
+
+        # Public styles are created by merging base and specific styles
+        @classmethod
+        def get_primary_style(cls):
+            return {**WebAppConfig.BASE_STYLE, **cls._primary_specific}
+        
+        @classmethod
+        def get_other_style(cls):
+            return {**WebAppConfig.BASE_STYLE, **cls._other_specific}
+
+    class Procedure:
+        """Contains styles related to medical procedures."""
+        # Specific styles
+        _major_specific = {"color": "#4A235A", "backgroundColor": "#F3EFF7", "fontWeight": "bold"}
+        _other_specific = {"color": "#6C3483", "backgroundColor": "#FBF5FC", "fontStyle": "italic"}
+
+        # Public, merged styles
+        @classmethod
+        def get_major_style(cls):
+            return {**WebAppConfig.BASE_STYLE, **cls._major_specific}
+        
+        @classmethod
+        def get_other_style(cls):
+            return {**WebAppConfig.BASE_STYLE, **cls._other_specific}
