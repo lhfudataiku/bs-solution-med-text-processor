@@ -55,12 +55,13 @@ def create_evidence_details_map(df, domain_style_map):
         domain_df  = df[df['domain'] == domain]
         for _, row in domain_df.iterrows():
             concept = row.get('concept', 'N/A')
+            domain = row.get('domain', 'N/A')
             try:
                 evidence_list = json.loads(row.get('evidence', '[]'))
                 for evidence_str in evidence_list:
                     quote = evidence_str.strip()
                     if quote and quote not in evidence_map:
-                        evidence_map[quote] = {'style': style,'concept': concept}
+                        evidence_map[quote] = {'style': style,'concept': concept, 'domain': domain}
             except (json.JSONDecodeError, TypeError):
                 continue
     return evidence_map
@@ -92,7 +93,7 @@ def build_styled_text_components(text, details_map):
             evidence_counter += 1
 
             final_components.append(html.Span(part, style=details['style'], id=component_id))
-            tooltip_components.append(dbc.Tooltip(details['concept'], target=component_id, style=WebAppConfig.TOOLTIP_STYLE))
+            tooltip_components.append(dbc.Tooltip(f"{details['domain']}: {details['concept']}", target=component_id, style=WebAppConfig.TOOLTIP_STYLE))
         else:
             for i, line in enumerate(part.split('\n')):
                 if line:
