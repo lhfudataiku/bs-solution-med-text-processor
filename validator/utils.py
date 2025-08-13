@@ -42,33 +42,55 @@ def read_note_id(filters):
     except Exception: return None
     return None
 
-def create_evidence_style_map(evidence_set, style_dict_set):
-    """Map an envidence string to its corresponding sytle dictionary"""
-    h_dict = {}
-    for evidence, style in zip(evidence_set, style_dict_set):
-        for quote in evidence:
-            if quote and quote not in h_dict:
-                h_dict[quote] = style
-    return h_dict
+def create_evidence_details_map(df, domain_style_map):
+    """
+    Creates a single dictionary mapping each evidence string to its style
+    and its correspnding concept text for the tooltip.
+    
+    Args:
+        df (pd.DataFrame): The dataframe containing the LLM outputs.
+        domain_style_map (dict): A mapping of domain names to style dictionaries.
+    
+    Returns:
+        dict: A map like {evidences_string: {style: style_dict, concept: concept_text}}
+    """
 
-def build_styled_text_components(text, style_map):
-    """splits text into a list of strings and styled html.Span components"""
-    if not style_map:
+    evidence_map = {}
+    for domain, style in domain_style_map.items():
+        domain_df  = df[df['domain'] == domain]
+        for _, row in domain_df.iterrows():
+            concept = row.get('concept' 'N/A')
+            try:
+                evidence_list = json.loads(row.get('evidence', '[]'))
+                for evidence_list in evidence_list:
+                    quote = evidence_list.strip()
+                    if quote and quote not in evidence_map:
+                        evidence_map[quote] = {'style': style,'concept': concept}
+            except (json.JSONDecodeError, TypeError):
+                continue
+    return evidence_map
+
+def build_styled_text_components(text, details_map):
+    """
+    splits text into a list of strings and styled html.Span components,
+    adding a 'title' attribte for hover text.
+    """
+    if not details_map:
         # split by newlines
         return [html.P(line) for line in text.split('\n')]
     
     # create a regex pattern that finds all quotes to be styled
-    pattern = re.compile(f"({'|'.join(re.escape(key) for key in sorted(style_map.keys(), key=len, reverse=True))})")
+    pattern = re.compile(f"({'|'.join(re.escape(key) for key in sorted(details_map.keys(), key=len, reverse=True))})")
     # split the text by the found quotes
     text_parts = pattern.split(text)
     
     # build the list of components
     final_components = []
     for part in text_parts:
-        if not part:
-            continue
-        if part in style_map:
-            final_components.append(html.Span(part, style=style_map[part]))
+        if not part: continue
+        if part in details_map:
+            details = details_map[part]
+            final_components.append(html.Span(part, style=details['style'], title=details['concept']))
         else:
             for i, line in enumerate(part.split('\n')):
                 if line:
