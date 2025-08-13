@@ -24,13 +24,6 @@ def get_note_metadata_by_note_id(note_id):
     )
     return output_df
 
-def collect_evidence_from_df(df, domain):
-    evidence_set = set()
-    evidence_series = df.query(f"domain=='{domain}'")['evidence'].apply(json.loads).explode()
-    quotes = [str(quote).strip() for quote in evidence_series if quote]
-    evidence_set.update(quotes)
-    return evidence_set
-
 def read_note_id(filters):
     if not isinstance(filters, list): return None
     try:
@@ -59,11 +52,11 @@ def create_evidence_details_map(df, domain_style_map):
     for domain, style in domain_style_map.items():
         domain_df  = df[df['domain'] == domain]
         for _, row in domain_df.iterrows():
-            concept = row.get('concept' 'N/A')
+            concept = row.get('concept', 'N/A')
             try:
                 evidence_list = json.loads(row.get('evidence', '[]'))
-                for evidence_list in evidence_list:
-                    quote = evidence_list.strip()
+                for evidence_str in evidence_list:
+                    quote = evidence_str.strip()
                     if quote and quote not in evidence_map:
                         evidence_map[quote] = {'style': style,'concept': concept}
             except (json.JSONDecodeError, TypeError):
