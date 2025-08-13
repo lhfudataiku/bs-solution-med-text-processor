@@ -1,9 +1,11 @@
 from dash import html
+import dash_bootstrap_components as dbc
 import dataiku
 import re
 import json
 from webapp.webaiku.ds_filters import filter_dataset
 from webaiku.apis.dataiku.formula import DataikuFormula
+from webapp.validator.config import WebAppConfig
 
 
 def get_llm_outputs_by_note_id(note_id):
@@ -79,11 +81,18 @@ def build_styled_text_components(text, details_map):
     
     # build the list of components
     final_components = []
+    tooltip_components = []
+    evidence_counter = 0
+
     for part in text_parts:
         if not part: continue
         if part in details_map:
             details = details_map[part]
-            final_components.append(html.Span(part, style=details['style'], title=details['concept']))
+            component_id = f"evidence-span-{evidence_counter}"
+            evidence_counter += 1
+
+            final_components.append(html.Span(part, style=details['style'], id=component_id))
+            tooltip_components.append(dbc.Tooltip(details['concept'], target=component_id, style=WebAppConfig.TOOLTIP_STYLE))
         else:
             for i, line in enumerate(part.split('\n')):
                 if line:
@@ -92,5 +101,5 @@ def build_styled_text_components(text, details_map):
                 if i < len(part.split('\n')) - 1:
                     final_components.append(html.Br())
                     final_components.append(html.Br())
-                    
-    return html.Div(final_components, style={'line-height': '1.8', 'text-align': 'justify'})
+    styled_text_div = html.Div(final_components, style={'line-height': '1.8', 'text-align': 'justify'})               
+    return styled_text_div, tooltip_components
