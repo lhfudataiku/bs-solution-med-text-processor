@@ -2,15 +2,27 @@ from dash import html
 import dataiku
 import re
 import json
+from webapp.webaiku.ds_filters import filter_dataset
+from webaiku.apis.dataiku.formula import DataikuFormula
 
 
-def load_data(note_id):
-    data = dataiku.Dataset("synthetic_notes_llm_billing_sorted").get_dataframe()
-    return data[data['note_id'] == note_id]
+def get_llm_outputs_by_note_id(note_id):
+    filter_formula = DataikuFormula()
+    filter_formula.filter_column_by_values("note_id", [str(note_id)])
+    filter_expression = filter_formula.execute()
+    output_df = filter_dataset(
+        "synthetic_notes_llm_billing_w_labels", filters=filter_expression
+    )
+    return output_df
 
-def load_selected_discharge_summary(note_id):
-    data = dataiku.Dataset("synthetic_notes_prepared").get_dataframe()
-    return data[data['note_id'] == note_id]
+def get_note_metadata_by_note_id(note_id):
+    filter_formula = DataikuFormula()
+    filter_formula.filter_column_by_values("note_id", [str(note_id)])
+    filter_expression = filter_formula.execute()
+    output_df = filter_dataset(
+        "synthetic_notes_prepared", filters=filter_expression
+    )
+    return output_df
 
 def collect_evidence_from_df(df, domain):
     evidence_set = set()
