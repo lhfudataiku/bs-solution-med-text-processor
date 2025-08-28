@@ -49,3 +49,11 @@ class WebAppConfig:
         @classmethod
         def get_other_style(cls):
             return {**WebAppConfig.BASE_STYLE, **cls._other_specific}
+        
+class WebAppVariables:
+    MODEL_BILLING_DATASET = "notes_llm_billing_w_labels"
+    NOTE_METADATA_DATASET = "clinical_notes_prepared"
+    NOTE_SUMMARY_DATASET = "notes_summarization"
+    VISUALEDIT_VIEW_EDITS_DATASET = "billing_codes_validation_view_edits"
+    VISUALEDIT_VIEW_EDITLOG_DATASET = "billing_codes_validation_view_editlog"
+    CODE_REFERENCE = "billing_codes_reference"

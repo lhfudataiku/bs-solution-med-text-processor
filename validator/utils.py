@@ -3,9 +3,12 @@ import dash_bootstrap_components as dbc
 import dataiku
 import re
 import json
-from webapp.webaiku.ds_filters import filter_dataset
+from typing import List, Dict, TypedDict, Union, Optional
+
+from webapp.webaiku.ds_filters import filter_dataset, DatasetFilter
 from webaiku.apis.dataiku.formula import DataikuFormula
-from webapp.validator.config import WebAppConfig
+from webaiku.apis.dataiku.filters import CustomFilter, FilterType
+from webapp.validator.config import WebAppConfig, WebAppVariables
 
 
 def get_llm_outputs_by_note_id(note_id):
@@ -13,7 +16,7 @@ def get_llm_outputs_by_note_id(note_id):
     filter_formula.filter_column_by_values("note_id", [str(note_id)])
     filter_expression = filter_formula.execute()
     output_df = filter_dataset(
-        "synthetic_notes_llm_billing_w_labels", filters=filter_expression
+        WebAppVariables.MODEL_BILLING_DATASET, filters=filter_expression
     )
     return output_df
 
@@ -22,7 +25,57 @@ def get_note_metadata_by_note_id(note_id):
     filter_formula.filter_column_by_values("note_id", [str(note_id)])
     filter_expression = filter_formula.execute()
     output_df = filter_dataset(
-        "synthetic_notes_prepared", filters=filter_expression
+        WebAppVariables.NOTE_METADATA_DATASET, filters=filter_expression
+    )
+    return output_df
+
+def get_committed_note_ids():
+    committed_notes = dataiku.Dataset(WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET)
+    committed_notes_df = committed_notes.get_dataframe(columns=['Note ID', 'Reviewed'])
+    verified_notes_df = committed_notes_df[committed_notes_df["Reviewed"]]
+    return verified_notes_df['Note ID'].unique()
+
+def get_note_summary_by_note_id(note_id):
+    filter_formula = DataikuFormula()
+    filter_formula.filter_column_by_values("note_id", [str(note_id)])
+    filter_expression = filter_formula.execute()
+    output_df = filter_dataset(
+        WebAppVariables.NOTE_SUMMARY_DATASET, filters=filter_expression
+    )
+    return output_df
+
+def get_verified_codes_by_note_id(note_id):
+    filter_formula = DataikuFormula()
+    filter_formula.filter_column_by_values("Note ID", [str(note_id)])
+    filter_expression = filter_formula.execute()
+    output_df = filter_dataset(
+        WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
+        filters=filter_expression, 
+        columns=['Note ID', 'No', 'Concept type', 'Mapped billing code', 'Reviewed', 'Comments'],
+        keep_default_na=False
+    )
+    return output_df
+
+def get_code_labels(codes: List[str]):
+    filter_formula = DataikuFormula()
+    filter_formula.filter_column_by_values("billing_references", codes)
+    filter_expression = filter_formula.execute()
+    output_df = filter_dataset(
+        WebAppVariables.CODE_REFERENCE, 
+        filters=filter_expression, 
+        columns = ['billing_references', 'label']
+    )
+    return output_df
+
+def get_edit_logs_by_note_id(note_id):
+    custom_filter = CustomFilter(
+        filterType=FilterType.Contains, value=str(note_id), toValue=None, operator="and"
+    )
+    datasetFilter = DatasetFilter(column="key", filter=custom_filter)
+    output_df = filter_dataset(
+        WebAppVariables.VISUALEDIT_VIEW_EDITLOG_DATASET, 
+        filters=[datasetFilter],
+        columns=['date', 'user', 'key', 'column_name']
     )
     return output_df
 
