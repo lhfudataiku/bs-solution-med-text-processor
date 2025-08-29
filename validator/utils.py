@@ -30,10 +30,16 @@ def get_note_metadata_by_note_id(note_id):
     return output_df
 
 def get_committed_note_ids():
-    committed_notes = dataiku.Dataset(WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET)
-    committed_notes_df = committed_notes.get_dataframe(columns=['Note ID', 'Verified'], keep_default_na=False)
-    verified_notes_df = committed_notes_df[committed_notes_df["Verified"]==True]
-    return verified_notes_df['Note ID'].unique()
+    filter_formula = DataikuFormula()
+    filter_formula.filter_column_by_values("Verified", [str(True)])
+    filter_expression = filter_formula.execute()
+    output_df = filter_dataset(
+        WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
+        filters=filter_expression, 
+        columns=['Note ID', 'Verified'],
+        keep_default_na=False
+    )
+    return output_df['Note ID'].unique()
 
 def get_note_summary_by_note_id(note_id):
     filter_formula = DataikuFormula()
@@ -47,6 +53,7 @@ def get_note_summary_by_note_id(note_id):
 def get_verified_codes_by_note_id(note_id):
     filter_formula = DataikuFormula()
     filter_formula.filter_column_by_values("Note ID", [str(note_id)])
+    filter_formula.filter_column_by_values("Verified", [str(True)])
     filter_expression = filter_formula.execute()
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITED_DATASET, 
