@@ -31,8 +31,8 @@ def get_note_metadata_by_note_id(note_id):
 
 def get_committed_note_ids():
     committed_notes = dataiku.Dataset(WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET)
-    committed_notes_df = committed_notes.get_dataframe(columns=['Note ID', 'Reviewed'])
-    verified_notes_df = committed_notes_df[committed_notes_df["Reviewed"]]
+    committed_notes_df = committed_notes.get_dataframe(columns=['Note ID', 'Verified'], keep_default_na=False)
+    verified_notes_df = committed_notes_df[committed_notes_df["Verified"]==True]
     return verified_notes_df['Note ID'].unique()
 
 def get_note_summary_by_note_id(note_id):
@@ -51,7 +51,7 @@ def get_verified_codes_by_note_id(note_id):
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
         filters=filter_expression, 
-        columns=['Note ID', 'No', 'Concept type', 'Mapped billing code', 'Reviewed', 'Comments'],
+        columns=['Note ID', 'No', 'Concept type', 'Mapped billing code', 'Verified', 'Comments'],
         keep_default_na=False
     )
     return output_df
