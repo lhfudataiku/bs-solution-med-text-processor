@@ -56,4 +56,5 @@ class WebAppVariables:
     NOTE_SUMMARY_DATASET = "notes_summarization"
     VISUALEDIT_VIEW_EDITS_DATASET = "billing_codes_validation_view_edits"
     VISUALEDIT_VIEW_EDITLOG_DATASET = "billing_codes_validation_view_editlog"
+    VISUALEDIT_VIEW_EDITED_DATASET = "billing_codes_validation_view_edited"
     CODE_REFERENCE = "billing_codes_reference"

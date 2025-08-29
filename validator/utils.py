@@ -49,7 +49,7 @@ def get_verified_codes_by_note_id(note_id):
     filter_formula.filter_column_by_values("Note ID", [str(note_id)])
     filter_expression = filter_formula.execute()
     output_df = filter_dataset(
-        WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
+        WebAppVariables.VISUALEDIT_VIEW_EDITED_DATASET, 
         filters=filter_expression, 
         columns=['Note ID', 'No', 'Concept type', 'Mapped billing code', 'Verified', 'Comments'],
         keep_default_na=False
