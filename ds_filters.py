@@ -42,7 +42,6 @@ def filter_dataset(
     
     # Get the full dataset first
     df = dataset.get_dataframe(
-        columns=columns,
         infer_with_pandas=infer_with_pandas,
         parse_dates=parse_dates,
         bool_as_str=bool_as_str,
@@ -52,6 +51,10 @@ def filter_dataset(
     )
     
     # Apply filters if provided
+    if columns:
+        available_columns = [col for col in columns if col in df.columns]
+        df = df[available_columns]
+        
     if filters:
         df = apply_filters(df, filters)
     
