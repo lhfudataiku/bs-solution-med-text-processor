@@ -28,7 +28,7 @@ def get_note_metadata_by_note_id(note_id):
 
 def get_committed_note_ids():
     filters = {
-        "Verified": {"equals": [str(True)]}
+        "Verified": {"equals": [True]}
     }
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
