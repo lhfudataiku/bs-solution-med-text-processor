@@ -1,100 +1,98 @@
 from dash import html
 import dash_bootstrap_components as dbc
-import dataiku
 import re
 import json
-from typing import List, Dict, TypedDict, Union, Optional
+from typing import List
 
-from webapp.webaiku.ds_filters import filter_dataset, DatasetFilter
-from webaiku.apis.dataiku.formula import DataikuFormula
-from webaiku.apis.dataiku.filters import CustomFilter, FilterType
+from webaiku.ds_filters import filter_dataset
 from webapp.validator.config import WebAppConfig, WebAppVariables
 
 
 def get_llm_outputs_by_note_id(note_id):
-    filter_formula = DataikuFormula()
-    filter_formula.filter_column_by_values("note_id", [str(note_id)])
-    filter_expression = filter_formula.execute()
+    filters = {
+        "note_id": {"equals": [str(note_id)]}
+    }
     output_df = filter_dataset(
-        WebAppVariables.MODEL_BILLING_DATASET, filters=filter_expression
+        WebAppVariables.MODEL_BILLING_DATASET, filters=filters
     )
     return output_df
 
 def get_note_metadata_by_note_id(note_id):
-    filter_formula = DataikuFormula()
-    filter_formula.filter_column_by_values("note_id", [str(note_id)])
-    filter_expression = filter_formula.execute()
+    filters = {
+        "note_id": {"equals": [str(note_id)]}
+    }
     output_df = filter_dataset(
-        WebAppVariables.NOTE_METADATA_DATASET, filters=filter_expression
+        WebAppVariables.NOTE_METADATA_DATASET, filters=filters
     )
     return output_df
 
 def get_committed_note_ids():
-    filter_formula = DataikuFormula()
-    filter_formula.filter_column_by_values("Verified", [str(True)])
-    filter_expression = filter_formula.execute()
+    filters = {
+        "Verified": {"equals": [str(True)]}
+    }
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
-        filters=filter_expression, 
+        filters=filters, 
         columns=['Note ID', 'Verified'],
         keep_default_na=False
     )
     return output_df['Note ID'].unique()
 
 def get_note_summary_by_note_id(note_id):
-    filter_formula = DataikuFormula()
-    filter_formula.filter_column_by_values("note_id", [str(note_id)])
-    filter_expression = filter_formula.execute()
+    filters = {
+        "note_id": {"equals": [str(note_id)]}
+    }
     output_df = filter_dataset(
-        WebAppVariables.NOTE_SUMMARY_DATASET, filters=filter_expression
+        WebAppVariables.NOTE_SUMMARY_DATASET, filters=filters
     )
     return output_df
 
 def get_verified_codes_by_note_id(note_id):
-    filter_formula = DataikuFormula()
-    filter_formula.filter_column_by_values("Note ID", [str(note_id)])
-    filter_formula.filter_column_by_values("Verified", [str(True)])
-    filter_expression = filter_formula.execute()
+    filters = {
+        "Note ID": {"equals": [str(note_id)]},
+        "Verified": {"equals": [str(True)]}
+    }
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITED_DATASET, 
-        filters=filter_expression, 
+        filters=filters, 
         columns=['Note ID', 'No', 'Concept type', 'Mapped billing code', 'Verified', 'Comments'],
         keep_default_na=False
     )
     return output_df
 
 def get_code_labels(codes: List[str]):
-    filter_formula = DataikuFormula()
-    filter_formula.filter_column_by_values("billing_references", codes)
-    filter_expression = filter_formula.execute()
+    filters = {
+        "billing_references": {"equals": codes}
+    }
     output_df = filter_dataset(
         WebAppVariables.CODE_REFERENCE, 
-        filters=filter_expression, 
+        filters=filters, 
         columns = ['billing_references', 'label']
     )
     return output_df
 
 def get_edit_logs_by_note_id(note_id):
-    custom_filter = CustomFilter(
-        filterType=FilterType.Contains, value=str(note_id), toValue=None, operator="and"
-    )
-    datasetFilter = DatasetFilter(column="key", filter=custom_filter)
+    filters = {
+        "key": {"contains": str(note_id)}
+    }
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITLOG_DATASET, 
-        filters=[datasetFilter],
+        filters=filters,
         columns=['date', 'user', 'key', 'column_name']
     )
     return output_df
 
 def read_note_id(filters):
-    if not isinstance(filters, list): return None
+    if not isinstance(filters, list):
+        return None
     try:
         for fitem in filters:
             if isinstance(fitem, dict) and fitem.get('column') == 'Note ID':
                 selected_values = fitem.get('selectedValues')
                 if isinstance(selected_values, dict) and selected_values:
                     return next(iter(selected_values))
-    except Exception: return None
+    except Exception:
+        return None
     return None
 
 def create_evidence_details_map(df, domain_style_map):
@@ -146,7 +144,8 @@ def build_styled_text_components(text, details_map):
     evidence_counter = 0
 
     for part in text_parts:
-        if not part: continue
+        if not part:
+            continue
         if part in details_map:
             details = details_map[part]
             component_id = f"evidence-span-{evidence_counter}"
