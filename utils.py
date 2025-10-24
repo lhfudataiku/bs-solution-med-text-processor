@@ -4,8 +4,8 @@ import re
 import json
 from typing import List
 
-from webaiku.ds_filters import filter_dataset
-from webapp.validator.config import WebAppConfig, WebAppVariables
+from webapp.ds_filters import filter_dataset
+from webapp.config import WebAppConfig, WebAppVariables
 
 
 def get_llm_outputs_by_note_id(note_id):

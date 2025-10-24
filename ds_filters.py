@@ -1,6 +1,5 @@
 import dataiku
 import pandas as pd
-import functools
 from typing import List, Dict, Optional
 
 
