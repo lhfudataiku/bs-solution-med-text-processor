@@ -4,13 +4,13 @@ import re
 import json
 from typing import List
 
-from webaiku.ds_filters import filter_dataset
-from webapp.validator.config import WebAppConfig, WebAppVariables
+from webapp.ds_filters import filter_dataset
+from webapp.config import WebAppConfig, WebAppVariables
 
 
 def get_llm_outputs_by_note_id(note_id):
     filters = {
-        "note_id": {"equals": [str(note_id)]}
+        "note_id": {"equals": [note_id]}
     }
     output_df = filter_dataset(
         WebAppVariables.MODEL_BILLING_DATASET, filters=filters
@@ -19,7 +19,7 @@ def get_llm_outputs_by_note_id(note_id):
 
 def get_note_metadata_by_note_id(note_id):
     filters = {
-        "note_id": {"equals": [str(note_id)]}
+        "note_id": {"equals": [note_id]}
     }
     output_df = filter_dataset(
         WebAppVariables.NOTE_METADATA_DATASET, filters=filters
@@ -28,7 +28,7 @@ def get_note_metadata_by_note_id(note_id):
 
 def get_committed_note_ids():
     filters = {
-        "Verified": {"equals": [str(True)]}
+        "Verified": {"equals": [True]}
     }
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITS_DATASET, 
@@ -40,7 +40,7 @@ def get_committed_note_ids():
 
 def get_note_summary_by_note_id(note_id):
     filters = {
-        "note_id": {"equals": [str(note_id)]}
+        "note_id": {"equals": [note_id]}
     }
     output_df = filter_dataset(
         WebAppVariables.NOTE_SUMMARY_DATASET, filters=filters
@@ -49,7 +49,7 @@ def get_note_summary_by_note_id(note_id):
 
 def get_verified_codes_by_note_id(note_id):
     filters = {
-        "Note ID": {"equals": [str(note_id)]},
+        "Note ID": {"equals": [note_id]},
         "Verified": {"equals": [str(True)]}
     }
     output_df = filter_dataset(
@@ -73,7 +73,7 @@ def get_code_labels(codes: List[str]):
 
 def get_edit_logs_by_note_id(note_id):
     filters = {
-        "key": {"contains": str(note_id)}
+        "key": {"contains": note_id}
     }
     output_df = filter_dataset(
         WebAppVariables.VISUALEDIT_VIEW_EDITLOG_DATASET, 
